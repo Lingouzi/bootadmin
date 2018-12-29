@@ -1,0 +1,59 @@
+spring:
+  ####配置 页面模板的参数，
+  freemarker:
+    charset: utf-8
+    suffix: .html
+    content-type: text/html
+    settings:
+      ##格式化这个项目中，页面数字的显示，小数位数最多显示10位
+      number_format: 0.##############
+  http:
+    encoding:
+      charset: UTF-8
+  servlet:
+    ### boot2.0中，文件上传下载的大小限制修改了配置的地址。
+    multipart:
+      max-request-size: 10MB
+      max-file-size: 10MB
+  #### 配置静态资源的地址。html文件中，可以直接使用/static/目录
+  resources:
+    ## 静态资源加载目录顺序:META/resources > resources > static > public
+    ## 此处配置, 不允许直接访问templates目录下的html文件
+    static-locations: "classpath:/"
+  profiles:
+    ###指定启动的环境, 找到对应的配置文件
+    active: dev
+  mvc:
+    favicon:
+      ## 禁用spring提供的小图标.使用自己的图标,要讲favicon.ico文件放到static目录下.
+      enabled: false
+  activemq:
+    #账号密码
+    user: user
+    password: user
+    #URL of the ActiveMQ broker.
+    broker-url: tcp://127.0.0.1:61616
+    in-memory: false
+    #必须使用连接池
+    pool:
+      #启用连接池
+      enabled: true
+      #连接池最大连接数
+      max-connections: 5
+      #空闲的连接过期时间，默认为30秒
+      idle-timeout: 30s
+      # springboot2.0 弃用了 此配置
+      #expiry-timeout: 0ms
+  jms:
+    ##开启topic主题订阅模式要设置这个.
+    pub-sub-domain: true
+##### 自定义 基础配置 #####
+settings:
+  ## 线程池的初始化 线程数量
+  coreThreadPoolNum: 20
+  ## 上传文件到服务器,默认的存储的位置
+  upload-file-save-path: "/Users/linyun/Downloads/"
+  ### id生成器的配置.集群使用, 当有集群的时候,这里只需要修改workid和datacenterid即可实现不重复的id.
+  idmarker:
+    workerId: 0
+    datacenterId: 1

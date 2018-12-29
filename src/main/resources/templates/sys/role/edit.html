@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge,chrome=1">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/zTree.v3/3.5.33/css/zTreeStyle/zTreeStyle.min.css"/>
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/css/custom-themes.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row p-3">
+        <div class="col">
+            <form class="needs-validation" novalidate>
+                <input type="hidden" name="id" id="id" value="${role.id}">
+                <div class="form-row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="" class="h4">名称</label>
+                        <input type="text" class="form-control form-control-sm" readonly value="${role.name}" id="name" name="name" placeholder="ROLE_" required>
+                        <div class="invalid-tooltip">填写名称</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="" class="h4">备注</label>
+                        <input type="text" class="form-control form-control-sm" value="${role.desc}" id="desc" name="desc" placeholder="备注" required>
+                        <div class="invalid-tooltip">备注</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="inputCity">角色权限</label>
+                        <input type="hidden" value="" name="values" id="values">
+                        <ul id="tree" class="ztree"></ul>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-primary" type="submit">提交</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
+<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zTree.v3/3.5.33/js/jquery.ztree.core.min.js"></script>
+<!-- 要使用check功能,需要加入check插件 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zTree.v3/3.5.33/js/jquery.ztree.excheck.min.js"></script>
+<script src="/static/plugins/layui/layui.all.js"></script>
+<script src="/static/js/buttonLoading.js"></script>
+<script src="/static/js/custom.js"></script>
+<script>
+    $(function () {
+        'use strict';
+        let zTreeObj;
+        let setting = {
+            check: {
+                enable: true,
+                chkStyle: 'checkbox',
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                    pIdKey: "pid"
+                }
+            },
+            callback: {
+                onCheck: onCheck,
+                onClick: function (e, treeId, treeNode, clickFlag) {
+                    //点击tree文字, 复选框也勾选上
+                    zTreeObj.checkNode(treeNode, !treeNode.checked, true);
+                }
+            }
+        };
+        let zNodes = JSON.parse('${treeNodes}');
+        $(document).ready(function () {
+            zTreeObj = $.fn.zTree.init($("#tree"), setting, zNodes);
+        });
+
+        $("form").submit(function () {
+            event.preventDefault();
+            event.stopPropagation();
+            if (this.checkValidity()) {
+                /* 允许提交 */
+                let loading = layer.load(1, {shade: 0.3});
+                request('/sysrole/edit', $("form").serializeObject(), function (e) {
+                    layer.closeAll('loading');
+                    if (e.code === 0) {
+                        closePage(e.msg);
+                        //刷新父级
+                        parent.reloadTable();
+                    } else {
+                        layer.msg(e.msg);
+                    }
+                });
+            }
+            $(this).addClass('was-validated');
+            return false;
+        })
+    });
+
+    function onCheck(e, treeId, treeNode) {
+        var ids = [];
+        var zTree = $.fn.zTree.getZTreeObj("tree");
+        var checks = zTree.getCheckedNodes(true);
+        for (let i = 0; i < checks.length; i++) {
+            ids.push(checks[i].id);
+        }
+        $("#values").val(ids);
+    }
+</script>
+</body>
+</html>

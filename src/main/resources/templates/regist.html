@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>BootAdmin</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .wd-300 {
+            width: 300px;
+        }
+
+        .is-invalid {
+            border-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid" style="background-color: #1d1d1d;">
+    <div class="row align-items-center d-flex justify-content-center" style="height: 100vh;">
+        <div class="col-8 col-xs-2 col-md-3 bg-white rounded align-self-center">
+            <div class="h3 text-center mt-3 mb-3">注册</div>
+            <form class="needs-validation" novalidate>
+                <div class="form-row">
+                    <div class="col-12 mb-3">
+                        <div class="input-group mb-3 form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon1"><i class="fa fa-user fa-fw"></i></span>
+                            </div>
+                            <input type="text" class="form-control" name="username" id="username" placeholder="登陆账号" required>
+                            <div class="invalid-tooltip">
+                                登陆账号不能为空
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 ">
+                        <div class="input-group mb-3 form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fa fa-lock fa-fw"></i></span>
+                            </div>
+                            <input type="password" class="form-control" name="password" id="password" placeholder="密码" required>
+                            <div class="invalid-feedback">
+                                密码不能为空
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 ">
+                        <div class="input-group mb-3 form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" id="basic-addon2"><i class="fa fa-key fa-fw"></i></span>
+                            </div>
+                            <input type="text" class="form-control" name="code" id="code" placeholder="推荐码" required>
+                            <div class="invalid-feedback">
+                                推荐码不能为空
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" id="submit" data-loading-text="Loading..." class="btn btn-info btn-block">注 册</button>
+            </form>
+            <div class="mt-3 mb-3 text-center" style="font-size: 10px;">已经是会员? <a href="/login" class="">登录</a></div>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
+<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="/static/plugins/lyModal/lyModal.js"></script>
+<script src="/static/js/buttonLoading.js"></script>
+<script>
+    (function () {
+        'use strict';
+        window.addEventListener('load', function () {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function (form) {
+                form.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (form.checkValidity() !== false) {
+                        $(".btn").button("loading");
+                        $.post("/registin", {username: $("#username").val(), password: $("#password").val(), code: $("#code").val()}, function (d) {
+                            $(".btn").button("reset");
+                            if (d.code === 1) {
+                                $.lyModal({content: d.msg});
+                            } else {
+                                $.lyModal({
+                                    content: '成功注册 <i class="fa fa-check"></i><br/> 即将跳转到登录',
+                                    onDestroy: function () {
+                                        window.location.href = "/login";
+                                    }
+                                });
+                            }
+                        }, "json");
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+</body>
+</html>

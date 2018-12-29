@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge,chrome=1">
+    <title>权限之间父子关系</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/zTree.v3/3.5.33/css/zTreeStyle/zTreeStyle.min.css" />
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/css/custom-themes.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row p-3">
+        <div class="col">
+            <div class="form-row">
+                <div class="col-sm-6 mb-3">
+                    <label for="inputCity">父级</label>
+                    <ul id="treeLeft" class="ztree"></ul>
+                    <input type="hidden" value="" name="pid" id="pid">
+                    <input type="hidden" value="" name="values" id="values">
+                </div>
+                <div class="col-sm-4 mb-3">
+                    <label for="inputState">子集</label>
+                    <ul id="treeRight" class="ztree"></ul>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-primary" type="submit" id="sub">提交</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
+<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zTree.v3/3.5.33/js/jquery.ztree.core.min.js"></script>
+<!-- 要使用check功能,需要加入check插件 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/zTree.v3/3.5.33/js/jquery.ztree.excheck.min.js"></script>
+<script src="/static/plugins/layui/layui.all.js"></script>
+<script src="/static/js/buttonLoading.js"></script>
+<script src="/static/js/custom.js"></script>
+<script>
+    $(function () {
+        'use strict';
+
+        $("#sub").click(function () {
+            var pid = $("#pid").val();
+            var values = $("#values").val();
+            if(pid && values){
+                request('/privilege/relationship',{value: values, id: pid},function (e) {
+                    if(e.code===0) {
+                        layer.alert(e.msg);
+                    }
+                })
+            }else{
+                layer.alert('没有选择任何权限');
+            }
+        })
+
+        let zTreeObj,zTreeObj2;
+        let setting = {
+            check: {
+                enable: true,
+                chkStyle: "radio",
+                radioType : "all"
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                    pIdKey: "pid"
+                }
+            },
+            callback: {
+                onCheck: onCheck
+            }
+        };
+        var setting2 = {
+            check: {
+                enable: true,
+                chkStyle: 'checkbox',
+                chkboxType: { "Y": "", "N": "" }
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                    idKey: "id",
+                    pIdKey: "pid"
+                }
+            },
+            callback: {
+                onCheck: onCheck2
+            }
+        };
+        let zNodes = JSON.parse('${treeNodes}');
+        $(document).ready(function(){
+            zTreeObj = $.fn.zTree.init($("#treeLeft"), setting, zNodes);
+            zTreeObj2 = $.fn.zTree.init($("#treeRight"), setting2, zNodes);
+        });
+    });
+
+    function onCheck(e, treeId, treeNode){
+        var ids = "";
+        var zTree = $.fn.zTree.getZTreeObj("treeLeft");
+        var checkCount = zTree.getCheckedNodes(true).length;
+        var checks = zTree.getCheckedNodes(true);
+        console.log(checks);
+        $("#pid").val(checks[0].id);
+    }
+    function onCheck2(e, treeId, treeNode){
+        var ids = [];
+        var zTree = $.fn.zTree.getZTreeObj("treeRight");
+        var checkCount = zTree.getCheckedNodes(true).length;
+        var checks = zTree.getCheckedNodes(true);
+        for (let i = 0; i < checks.length; i++) {
+            ids.push(checks[i].id);
+        }
+        $("#values").val(ids);
+    }
+</script>
+</body>
+</html>

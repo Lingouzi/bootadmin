@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge,chrome=1">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/css/custom-themes.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row p-3">
+        <div class="col">
+            <form class="needs-validation" novalidate>
+                <div class="form-row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="" class="h4">登录名</label>
+                        <input type="text" class="form-control form-control-sm" id="name" name="name" placeholder="登录名" required>
+                        <div class="valid-tooltip">good</div>
+                        <div class="invalid-tooltip">填写登录名称</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="" class="h4">密码</label>
+                        <input type="text" class="form-control form-control-sm" id="pass" name="pass" placeholder="密码" required>
+                        <div class="invalid-tooltip">填写密码</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="" class="h4">昵称</label>
+                        <input type="text" class="form-control form-control-sm" id="nick" name="nick" placeholder="nick" required>
+                        <div class="invalid-tooltip">填写昵称</div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-sm-6 mb-3">
+                        <label for="" class="h4">是否启用:</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="state" id="exampleRadios1" value="1" checked>
+                            <label class="form-check-label" for="exampleRadios1">激活</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="state" id="exampleRadios2" value="0">
+                            <label class="form-check-label" for="exampleRadios2">未激活</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="mb-3">
+                        <label for="" class="h4">头像</label>
+                        <input type="hidden" name="avatarUrl" id="avatarUrl" required>
+                        <div class="layui-upload-drag" id="test10">
+                            <i class="fa fa-cloud-upload fa-lg fa-3x"></i>
+                            <p>点击上传，或将文件拖拽到此处</p>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-sm btn-primary" type="submit">提交</button>
+            </form>
+        </div>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js" type="text/javascript"></script>
+<!-- bootstrap 基础js -->
+<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<!-- bootstrap 基础js -->
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="/static/plugins/layui/layui.all.js"></script>
+<!-- 按钮变为loading样式 -->
+<script src="/static/js/buttonLoading.js"></script>
+<!-- 系统基础js -->
+<script src="/static/js/custom.js"></script>
+<script>
+    $(function () {
+        'use strict';
+        layui.upload.render({
+            elem: '#test10'
+            , url: '/commons/upload'
+            , field:'files'
+            , before: function (obj) {
+                let loading = layer.load(1, {shade: 0.3});
+                //预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#test10').html('<img src="' + result + '" width="100"/>'); //图片链接（base64）
+                });
+            }
+            , done: function (res) {
+                layer.closeAll('loading');
+                if (res.code === 0) {
+                    $("#avatarUrl").val(res.data.url);
+                }
+            }
+        });
+
+        $("form").submit(function () {
+            event.preventDefault();
+            event.stopPropagation();
+            if (this.checkValidity()) {
+                /* 允许提交 */
+                let loading = layer.load(1, {shade: 0.3});
+                request('/sysuser/add', $("form").serializeObject(), function (e) {
+                    layer.closeAll('loading');
+                    if (e.code === 0) {
+                        closePage(e.msg);
+                        //刷新父级
+                        parent.reloadTable();
+                    } else {
+                        layer.msg(e.msg);
+                    }
+                });
+            }
+            $(this).addClass('was-validated');
+            return false;
+        })
+    });
+</script>
+</body>
+</html>

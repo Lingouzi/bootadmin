@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge,chrome=1">
+    <title>BootAdmin</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.5.2/flatpickr.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.5.2/themes/material_green.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/css/bootstrap3/bootstrap-switch.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/zTree.v3/3.5.33/css/zTreeStyle/zTreeStyle.min.css"/>
+    <link rel="stylesheet" href="/static/plugins/layui/css/layui.css">
+    <link rel="stylesheet" href="/static/plugins/bootstrap-fileinput/css/fileinput.min.css"/>
+    <link rel="stylesheet" href="/static/css/custom-themes.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body>
+<div class="page-wrapper chiller-theme sidebar-bg bg1 toggled">
+    <!-- ###########  start::左侧栏  ########### -->
+    <#include "../../ftl/leftpattern.ftl">
+    <!-- ###########  end::左侧栏  ########### -->
+    <!-- ###########  start::右侧主体内容  ########### -->
+    <main class="page-content">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/">Home</a></li>
+                            <li class="breadcrumb-item"><a href="javascript:">系统管理</a></li>
+                            <li class="breadcrumb-item active" aria-current="page">权限管理</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-1">
+                    <div class="form-group">
+                        <select id="state" name="state" class="form-control form-control-sm">
+                            <option value="">状态</option>
+                            <option value="1">上线</option>
+                            <option value="0">下线</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <div class="input-group input-group-sm" id="timepicker2">
+                            <input type="text" id="start" name="start" class="form-control datetimepicker-input" placeholder="开始时间,YYYY-MM-DD"/>
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <div class="input-group input-group-sm" id="timepicker2">
+                            <input type="text" id="end" name="end" class="form-control datetimepicker-input" placeholder="截止时间,YYYY-MM-DD"/>
+                            <div class="input-group-append">
+                                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" name="key" id="key" onkeypress="reloadTable(1)" placeholder="搜索关键字">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" data-loading-text="Search..." type="button" onclick="reloadTable(2)" id="search">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xs-2 col d-flex justify-content-end" style="height: 30px;">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-dark" onclick="add()"><i class="fa fa-plus"></i></button>
+                        <button type="button" class="btn btn-success" onclick="editRelationship()">权限父子关系</button>
+                        <button type="button" class="btn btn-info" onclick="reloadAllPrivileges(this)">重载所有权限</button>
+                        <button type="button" class="btn btn-danger" onclick="refreshAll(this)"><i class="fa fa-refresh"></i> 更新缓存中的权限</button>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-3 col">
+                    <table id="datas" class="table table-sm"></table>
+                </div>
+            </div>
+            <div class="row">
+                <#include "../../ftl/footer.ftl">
+            </div>
+        </div>
+    </main>
+    <!-- ###########  end::右侧主体内容  ########### -->
+</div>
+<script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/malihu-custom-scrollbar-plugin/3.1.5/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-contextmenu/2.7.1/jquery.contextMenu.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/bootstrap-table.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.12.1/locale/bootstrap-table-zh-CN.min.js"></script>
+<script src="/static/plugins/layui/layui.all.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.5.2/flatpickr.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-switch/3.3.4/js/bootstrap-switch.min.js"></script>
+<script src="/static/js/buttonLoading.js"></script>
+<script src="/static/js/js-for-list.js"></script>
+<script src="/static/js/custom.js"></script>
+<script>
+    $(function () {
+        'use strict';
+        //1.初始化Table
+        let oTable = new TableInit();
+        oTable.Init();
+
+        /* 使用 flatpicker 日期控件 */
+        $("#start").flatpickr({
+            dateFormat: "Y-m-d",
+        });
+        /* 使用layui的日期控件 */
+        layui.laydate.render({
+            elem: '#end'
+        });
+    });
+
+    /**
+     * 重载表格数据
+     */
+    function reloadTable(from) {
+        let search = true;
+        let key = $("#key").val();
+        if (event && event.keyCode !== 13 && from === 1) {
+            search = false;
+        }
+        if (search) {
+            let opt = {
+                url: "/privilege/datas",
+                silent: true,
+                query: {
+                    key: key,
+                    state: $("#state").val(),
+                    start: $("#start").val(),
+                    end: $("#end").val()
+                }
+            };
+            $("#search").button("loading");
+            $("#datas").bootstrapTable('refresh', opt);
+        }
+    }
+
+    /**
+     * 打开新建页面
+     */
+    function add() {
+        openPage('添加用户', '/privilege/gotoAdd', false, 700, null);
+    }
+
+    function editRelationship() {
+        openPage('编辑权限之间的父子关系', '/privilege/gotoRelationShip', false, 700, null);
+    }
+
+    /** 刷新所有的权限, 更新shiro中的权限信息, */
+    function refreshAll(obj) {
+        $(obj).button("loading");
+        request('/privilege/refreshAll', {}, function (e) {
+            $(obj).button("reset");
+            if (e.code === 0) {
+                layer.alert('更新完毕');
+            } else {
+                layer.alert('更新出现异常, 请联系管理员');
+            }
+        })
+    }
+
+    /** 重载所有权限,就是将系统后继添加的功能,加入到权限管理中, 之后还要刷新shiro权限才能起效 */
+    function reloadAllPrivileges(obj) {
+        $(obj).button("loading");
+        request('/privilege/reloadAllPrivileges', {}, function (e) {
+            $(obj).button("reset");
+            if (e.code === 0) {
+                layer.alert('全部更新完毕, 请刷新缓存中权限');
+            } else {
+                layer.alert('更新出现异常, 请联系管理员');
+            }
+        })
+    }
+
+    let TableInit = function () {
+        let oTableInit = {};
+        //初始化Table
+        oTableInit.Init = function () {
+            $('#datas').bootstrapTable({
+                url: '/privilege/datas',
+                method: 'post',
+                contentType: 'application/x-www-form-urlencoded',
+                totalField: 'total',
+                dataField: 'list',
+                undefinedText: '',
+                cache: false,
+                pagination: true,
+                sortable: false,
+                sortOrder: "desc",
+                sidePagination: "server",
+                pageNumber: 1,
+                pageSize: 10,
+                pageList: [10],
+                clickToSelect: true,
+                uniqueId: "id",
+                queryParams: function (params) {
+                    return {
+                        pageSize: params.limit,
+                        pageNum: (params.offset / params.limit) + 1,
+                        key: $("#key").val()
+                    };
+                },
+                responseHandler: function (res) {
+                    //关闭search按钮的loading效果
+                    $("#search").button("reset");
+                    return res;
+                },
+                onLoadError: function (e, r) {
+                    console.log(r.responseJSON);
+                    if (e === 401) {
+                        layer.alert('你无权访问此信息<br>' + r.responseJSON.path);
+                    }
+                },
+                rowStyle: function (row, index) {
+                    return {classes: row.state === 0 ? 'table-danger' : ''}
+                },
+                columns: [{
+                    field: 'isRowChecked',
+                    checkbox: true
+                }, {
+                    field: 'id',
+                    title: 'Id',
+                    formatter: function (value, row, index) {
+                        return row.id + '<br/><span style="color:#1db0b8">' + moment(row.date).format('YYYY-MM-DD HH:mm:ss') + '</span>';
+                    }
+                }, {
+                    field: 'name',
+                    title: '权限名称',
+                    formatter: function (value, row, index, field) {
+                        return '<span class="enable-edit-html" data-id="' + row.id + '" data-field="' + field + '">' + value + '</span>';
+                    }
+                }, {
+                    field: 'uri',
+                    title: '权限地址'
+                }, {
+                    field: 'desc',
+                    title: '权限说明',
+                    formatter: function (value, row, index, field) {
+                        return '<span class="enable-edit-html" data-id="' + row.id + '" data-field="' + field + '">' + value + '</span>';
+                    }
+                }, {
+                    field: 'state',
+                    title: '状态',
+                    formatter: function (value, row, index, field) {
+                        let state = row.state === 0 ? '注销' : '启用';
+                        let html = '<input id="state_' + row.id + '" type="checkbox" class="rowState" name="rowState" ' + (row.state === 0 ? '' : 'checked') + '>';
+                        return html;
+                    }
+                }, {
+                    title: '操作',
+                    formatter: actionFormatter
+                }]
+                , onLoadSuccess: function () {
+                    /* 数据加载成功后的操作 */
+                }, onPostBody: function () {
+                    /* 表格body生成后的操作 */
+                    /**
+                     *  格式化状态为switch */
+                    $('.rowState').bootstrapSwitch({
+                        onText: "启用",
+                        offText: "注销",
+                        labelWidth: 1,
+                        onColor: "success",
+                        offColor: "danger",
+                        size: "mini",
+                        onSwitchChange: function (event, state) {
+                            edit('/privilege/update', event.currentTarget.id.split('_')[1], 'state', state ? 1 : 0);
+                        }
+                    });
+                    /* 在可编辑的父级上加菜单,避免出现空串的时候,点击不出菜单栏. */
+                    $(".enable-edit-html").parent().addClass("enable-edit-parent");
+                    /**
+                     * 右键菜单插件
+                     */
+                    $.contextMenu({
+                        /* docs:https://swisnl.github.io/jQuery-contextMenu/docs.html */
+                        selector: '.enable-edit-parent',
+                        trigger: 'left',
+                        /*总的callback,如果子项菜单有定义callback,这里就不执行了.*/
+                        callback: function (key, options) {
+                        },
+                        items: {
+                            "edit": {
+                                name: "Edit", icon: "edit", callback: function (key, opt) {
+                                    let $t = $(opt.$trigger[0]).find("span");
+                                    let field = $t[0].dataset.field;
+                                    let id = $t[0].dataset.id;
+                                    let html = $t[0].innerHTML;
+                                    let layerIndex = layer.prompt({
+                                        value: html,
+                                        title: '编辑',
+                                    }, function (value, index, elem) {
+                                        if (html === value) {
+                                            layer.msg('未修改');
+                                        } else {
+                                            /* 更新数据并在成功之后回写 */
+                                            console.log('id:', id);
+                                            console.log('field:', field);
+                                            console.log('value:', value);
+                                            edit('/privilege/update', id, field, value, function (d) {
+                                                if (d.code === 0) {
+                                                    $($t[0]).html(value);
+                                                    layer.close(layerIndex);
+                                                }
+                                                layer.msg(d.msg);
+                                            });
+                                        }
+                                    });
+                                }
+                            },
+                            "quit": {
+                                name: "Quit", icon: function () {
+                                    return 'context-menu-icon context-menu-icon-quit';
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        };
+        return oTableInit;
+    };
+
+    //操作栏的格式化
+    function actionFormatter(value, row, index) {
+        let html = '<a href="javascript:;" class="btn-sm btn-info mr-2" title="查看"><i class="fa fa-search"></i></a>';
+        html = html + '<a href="javascript:;" class="btn-sm btn-primary mr-2" title="编辑"><i class="fa fa-pencil"></i></a>';
+        html = html + '<a href="javascript:;" class="btn-sm btn-danger mr-2" title="删除"><i class="fa fa-trash"></i></a>';
+        return '<div class="d-flex justify-content-start">' + html + '</div>';
+    }
+
+    function deleteAll() {
+        let data = $('#datas').bootstrapTable('getSelections');
+        if (data.length === 0) {
+            alert('没有选中任何行');
+        } else {
+            //
+            alert('选中的行:' + JSON.stringify(data));
+        }
+    }
+</script>
+</body>
+</html>
