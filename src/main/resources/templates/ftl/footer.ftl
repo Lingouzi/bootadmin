@@ -1,5 +1,5 @@
-<footer class="col mt-2">
-    <div class="card text-center">
+<footer class="col mt-2 ">
+    <div class="card text-center shadow">
         <div class="card-body">
             <h5 class="card-title">
                 <a target="_blank" href=""><i class="fa fa-facebook fa-fw"></i></a>
